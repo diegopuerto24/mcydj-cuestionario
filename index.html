@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Cliente Nuevo - MC&DJ</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yellow: #FFF97D;
+            --dark: #16150E;
+            --blue: #A0C7FE;
+            --orange: #F65904;
+            --gray: #F5F5F5;
+            --gray-dark: #666;
+            --gray-light: #E8E8E8;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #FAFAFA;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, var(--yellow) 0%, var(--blue) 100%);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            width: 180px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+        }
+
+        .brand-header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .brand-header p {
+            font-size: 1.15rem;
+            color: var(--dark);
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .questionnaire-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 3rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .progress-count {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: var(--orange);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--gray-light);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(246, 89, 4, 0.3);
+        }
+
+        .question-container {
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            display: inline-block;
+            background: var(--yellow);
+            color: var(--dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .question-subtitle {
+            font-size: 1rem;
+            color: var(--gray-dark);
+            margin-bottom: 2rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            background: var(--gray);
+            border: 3px solid transparent;
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-card:hover {
+            background: white;
+            border-color: var(--blue);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(160, 199, 254, 0.3);
+        }
+
+        .option-card.selected {
+            background: var(--yellow);
+            border-color: var(--dark);
+            box-shadow: 0 8px 24px rgba(255, 249, 125, 0.4);
+        }
+
+        .option-radio {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .option-card.selected .option-radio {
+            background: var(--dark);
+        }
+
+        .option-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+        }
+
+        .option-card.selected .option-radio::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .option-description {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--gray);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--blue);
+            background: white;
+            box-shadow: 0 4px 12px rgba(160, 199, 254, 0.2);
+        }
+
+        .checkbox-group {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--gray);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background: white;
+            border-color: var(--blue);
+        }
+
+        .checkbox-item.checked {
+            background: var(--yellow);
+            border-color: var(--dark);
+        }
+
+        .checkbox-box {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .checkbox-item.checked .checkbox-box {
+            background: var(--dark);
+        }
+
+        .checkbox-box::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            opacity: 0;
+        }
+
+        .checkbox-item.checked .checkbox-box::after {
+            opacity: 1;
+        }
+
+        .checkbox-label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1.25rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            flex: 0.4;
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--gray-light);
+        }
+
+        .btn-back:hover:not(:disabled) {
+            background: var(--gray);
+            border-color: var(--dark);
+        }
+
+        .btn-next {
+            background: var(--dark);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: var(--orange);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(246, 89, 4, 0.4);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: var(--dark);
+            font-weight: 900;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 12px 32px rgba(246, 89, 4, 0.5);
+        }
+
+        /* Thank you screen */
+        .thank-you-container {
+            animation: slideIn 0.4s ease;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .thank-you-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .next-steps-box {
+            background: var(--gray);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .next-steps-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: start;
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+
+        .step-desc {
+            color: var(--gray-dark);
+            font-size: 0.95rem;
+        }
+
+        .contact-info {
+            background: var(--dark);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+        }
+
+        .contact-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            border: 4px solid var(--gray-light);
+            border-top: 4px solid var(--orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .questionnaire-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .brand-header h1 {
+                font-size: 2rem;
+            }
+
+            .question-title {
+                font-size: 1.5rem;
+            }
+
+            .thank-you-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Definición del cuestionario (igual que antes)
+        const QUESTIONS = [
+            {
+                id: 'tipoPersona',
+                type: 'multiple',
+                title: '¿Qué tipo de persona eres o representa tu negocio?',
+                subtitle: 'Puedes seleccionar ambas si aplican (por ejemplo: eres profesionista independiente Y tienes una empresa)',
+                options: [
+                    {
+                        value: 'fisica',
+                        label: 'Persona Física',
+                        description: 'Soy un individuo que trabaja por cuenta propia o tengo ingresos personales'
+                    },
+                    {
+                        value: 'moral',
+                        label: 'Persona Moral',
+                        description: 'Tengo una empresa constituida (S.A., S. de R.L., A.C., etc.)'
+                    }
+                ]
+            },
+            {
+                id: 'actividadPrincipal',
+                type: 'multiple',
+                title: '¿Cuáles son tus actividades como Persona Física?',
+                subtitle: 'Selecciona todas las que apliquen',
+                condition: (answers) => answers.tipoPersona && answers.tipoPersona.includes('fisica'),
+                options: [
+                    {
+                        value: 'profesionista',
+                        label: 'Servicios Profesionales',
+                        description: 'Médico, abogado, consultor, arquitecto, contador, etc.'
+                    },
+                    {
+                        value: 'arrendamiento',
+                        label: 'Arrendamiento',
+                        description: 'Rento inmuebles (casas, locales, departamentos)'
+                    },
+                    {
+                        value: 'empresarial',
+                        label: 'Actividad Empresarial',
+                        description: 'Comercio, ventas, servicios no profesionales'
+                    },
+                    {
+                        value: 'asalariado',
+                        label: 'Asalariado',
+                        description: 'Trabajo en relación de dependencia y tengo otros ingresos'
+                    },
+                    {
+                        value: 'jubilado',
+                        label: 'Jubilado/Pensionado',
+                        description: 'Recibo pensión o jubilación'
+                    }
+                ]
+            },
+            {
+                id: 'facturacionMensual',
+                type: 'single',
+                title: '¿Cuál es tu nivel de facturación mensual aproximado como Persona Física?',
+                subtitle: 'Esto nos ayuda a dimensionar el servicio',
+                condition: (answers) => {
+                    const actividades = answers.actividadPrincipal || [];
+                    return actividades.includes('profesionista') || actividades.includes('empresarial');
+                },
+                options: [
+                    { value: 'micro', label: 'Menos de $50,000', description: 'Operación pequeña o inicio de actividades' },
+                    { value: 'pequeno', label: '$50,000 - $300,000', description: 'Negocio en crecimiento' },
+                    { value: 'mediano', label: '$300,000 - $800,000', description: 'Operación consolidada' },
+                    { value: 'grande', label: 'Más de $800,000', description: 'Gran volumen de operaciones' }
+                ]
+            },
+            {
+                id: 'facturacionMensualPM',
+                type: 'single',
+                title: '¿Cuál es el nivel de facturación mensual de tu empresa (Persona Moral)?',
+                subtitle: 'Esto nos ayuda a dimensionar el servicio',
+                condition: (answers) => answers.tipoPersona && answers.tipoPersona.includes('moral'),
+                options: [
+                    { value: 'micro', label: 'Menos de $100,000', description: 'Micro empresa' },
+                    { value: 'pequeno', label: '$100,000 - $500,000', description: 'Pequeña empresa' },
+                    { value: 'mediano', label: '$500,000 - $3,000,000', description: 'Mediana empresa' },
+                    { value: 'grande', label: 'Más de $3,000,000', description: 'Gran empresa' }
+                ]
+            },
+            {
+                id: 'propiedadesArrendamiento',
+                type: 'single',
+                title: '¿Cuántas propiedades tienes en arrendamiento?',
+                subtitle: 'Número aproximado de inmuebles rentados',
+                condition: (answers) => {
+                    const actividades = answers.actividadPrincipal || [];
+                    return actividades.includes('arrendamiento');
+                },
+                options: [
+                    { value: '1-2', label: '1-2 propiedades', description: 'Arrendamiento básico' },
+                    { value: '3-5', label: '3-5 propiedades', description: 'Múltiples propiedades' },
+                    { value: '6-15', label: '6-15 propiedades', description: 'Cartera mediana' },
+                    { value: '15+', label: 'Más de 15 propiedades', description: 'Gran cartera' }
+                ]
+            },
+            {
+                id: 'tieneEmpleados',
+                type: 'single',
+                title: '¿Tienes empleados?',
+                subtitle: 'Personas en nómina con relación laboral',
+                options: [
+                    { value: 'no', label: 'No tengo empleados', description: 'Trabajo solo o con socios' },
+                    { value: '1-5', label: '1 a 5 empleados', description: 'Equipo pequeño' },
+                    { value: '6-15', label: '6 a 15 empleados', description: 'Equipo mediano' },
+                    { value: '16-50', label: '16 a 50 empleados', description: 'Empresa mediana' },
+                    { value: '50+', label: 'Más de 50 empleados', description: 'Empresa grande' }
+                ]
+            },
+            {
+                id: 'actividadesComplementarias',
+                type: 'multiple',
+                title: '¿Realizas alguna de estas actividades? (Puedes seleccionar varias)',
+                subtitle: 'Servicios adicionales o especiales',
+                options: [
+                    { value: 'comercio', label: 'Comercio al por menor', description: 'Venta de productos con inventarios' },
+                    { value: 'manufactura', label: 'Manufactura o producción', description: 'Fabricación de productos' },
+                    { value: 'construccion', label: 'Construcción', description: 'Obras, proyectos de construcción' },
+                    { value: 'restaurante', label: 'Restaurante / Alimentos', description: 'Servicio de alimentos y bebidas' },
+                    { value: 'importacion', label: 'Importación / Exportación', description: 'Comercio exterior' },
+                    { value: 'ninguna', label: 'Ninguna de las anteriores', description: '' }
+                ]
+            },
+            {
+                id: 'etapaDelNegocio',
+                type: 'single',
+                title: '¿En qué etapa se encuentra tu negocio?',
+                subtitle: 'Esto nos ayuda a ofrecerte el soporte adecuado',
+                options: [
+                    { value: 'preoperacion', label: 'Pre-operación', description: 'Aún no inicio o estoy por iniciar' },
+                    { value: 'inicio', label: 'Inicio (menos de 1 año)', description: 'Primeros meses de operación' },
+                    { value: 'crecimiento', label: 'En crecimiento', description: 'Expandiendo operaciones o equipo' },
+                    { value: 'consolidado', label: 'Consolidado', description: 'Operación estable y madura' }
+                ]
+            },
+            {
+                id: 'volumenOperaciones',
+                type: 'single',
+                title: '¿Aproximadamente cuántas operaciones realizas al mes?',
+                subtitle: 'Considera: facturas emitidas + facturas recibidas + movimientos bancarios. Esto nos ayuda a dimensionar correctamente el trabajo.',
+                options: [
+                    { value: 'muy_bajo', label: 'Muy Bajo (Menos de 100)', description: 'Pocas operaciones al mes' },
+                    { value: 'bajo', label: 'Bajo (100 - 500)', description: 'Operaciones básicas' },
+                    { value: 'medio', label: 'Medio (501 - 1,500)', description: 'Volumen moderado' },
+                    { value: 'alto', label: 'Alto (1,501 - 5,000)', description: 'Volumen considerable' },
+                    { value: 'muy_alto', label: 'Muy Alto (Más de 5,000)', description: 'Volumen muy grande' }
+                ]
+            },
+            {
+                id: 'cuentasBancarias',
+                type: 'single',
+                title: '¿Con cuántas cuentas bancarias opera tu negocio?',
+                subtitle: 'Incluye cuentas de cheques, ahorro, inversión y tarjetas empresariales. Cada cuenta requiere conciliación mensual.',
+                options: [
+                    { value: '1', label: '1 cuenta', description: 'Una sola cuenta bancaria' },
+                    { value: '2-3', label: '2-3 cuentas', description: 'Pocas cuentas' },
+                    { value: '4-6', label: '4-6 cuentas', description: 'Múltiples cuentas' },
+                    { value: '7-10', label: '7-10 cuentas', description: 'Muchas cuentas' },
+                    { value: '10+', label: 'Más de 10 cuentas', description: 'Alto número de cuentas' }
+                ]
+            },
+            {
+                id: 'operacionesSinCFDI',
+                type: 'single',
+                title: '¿Qué porcentaje de tus movimientos bancarios NO tienen factura (CFDI)?',
+                subtitle: 'Ejemplo: efectivo, transferencias sin factura, comisiones bancarias, intereses. Estas operaciones requieren clasificación manual adicional.',
+                options: [
+                    { value: '0-10', label: 'Casi ninguna (0-10%)', description: 'Todo o casi todo está facturado' },
+                    { value: '11-25', label: 'Pocas (11-25%)', description: 'La mayoría tiene factura' },
+                    { value: '26-50', label: 'Algunas (26-50%)', description: 'Aproximadamente la mitad' },
+                    { value: '51-75', label: 'Bastantes (51-75%)', description: 'Muchas sin factura' },
+                    { value: '76-100', label: 'La mayoría (76-100%)', description: 'Principalmente operaciones sin factura' }
+                ]
+            },
+            {
+                id: 'datosContacto',
+                type: 'form',
+                title: 'Por último, tus datos de contacto',
+                subtitle: 'Para poder enviarte información y ponernos en contacto',
+                fields: [
+                    { name: 'nombre', label: 'Nombre completo o razón social', type: 'text', required: true },
+                    { name: 'email', label: 'Correo electrónico', type: 'email', required: true },
+                    { name: 'telefono', label: 'Teléfono', type: 'tel', required: true },
+                    { name: 'comentarios', label: 'Comentarios adicionales (opcional)', type: 'textarea', required: false }
+                ]
+            }
+        ];
+
+        // Función para calcular complejidad operativa
+        function calcularComplejidad(answers) {
+            // Puntos por facturación
+            const facturacion = answers.facturacionMensualPM || answers.facturacionMensual || 'micro';
+            const puntosFacturacion = {
+                'micro': 1,
+                'pequeno': 2,
+                'mediano': 3,
+                'grande': 4
+            }[facturacion] || 2;
+
+            // Puntos por volumetría (PESO MAYOR)
+            const volumetria = answers.volumenOperaciones || 'bajo';
+            const puntosVolumetria = {
+                'muy_bajo': 1,
+                'bajo': 2,
+                'medio': 3,
+                'alto': 4,
+                'muy_alto': 5
+            }[volumetria] || 2;
+
+            // Puntos por empleados
+            const empleados = answers.tieneEmpleados || 'no';
+            const puntosEmpleados = {
+                'no': 1,
+                '1-5': 2,
+                '6-15': 2,
+                '16-50': 3,
+                '50+': 4
+            }[empleados] || 1;
+
+            // Cálculo ponderado: 30% facturación, 50% volumetría, 20% empleados
+            const complejidadTotal = 
+                (puntosFacturacion * 0.3) +
+                (puntosVolumetria * 0.5) +
+                (puntosEmpleados * 0.2);
+
+            // Clasificación final
+            let nivelComplejidad;
+            if (complejidadTotal < 1.5) nivelComplejidad = 'MICRO';
+            else if (complejidadTotal < 2.5) nivelComplejidad = 'PEQUEÑO';
+            else if (complejidadTotal < 3.5) nivelComplejidad = 'MEDIANO';
+            else if (complejidadTotal < 4.5) nivelComplejidad = 'GRANDE';
+            else nivelComplejidad = 'CORPORATIVO';
+
+            // Factor de cuentas bancarias
+            const cuentas = answers.cuentasBancarias || '1';
+            const numeroCuentas = cuentas === '10+' ? 12 : (cuentas === '7-10' ? 8 : (cuentas === '4-6' ? 5 : (cuentas === '2-3' ? 2.5 : 1)));
+            
+            // Factor de operaciones sin CFDI
+            const opsSinCFDI = answers.operacionesSinCFDI || '0-10';
+            const porcentajeSinCFDI = {
+                '0-10': 5,
+                '11-25': 18,
+                '26-50': 38,
+                '51-75': 63,
+                '76-100': 88
+            }[opsSinCFDI] || 5;
+
+            const factorSinCFDI = 1 + (porcentajeSinCFDI / 100);
+
+            // Estimación de horas mensuales
+            const horasBase = {
+                'MICRO': 10,
+                'PEQUEÑO': 25,
+                'MEDIANO': 45,
+                'GRANDE': 80,
+                'CORPORATIVO': 140
+            }[nivelComplejidad];
+
+            const horasEstimadas = Math.round(horasBase * (numeroCuentas / 2.5) * factorSinCFDI);
+
+            return {
+                nivelPorFacturacion: facturacion.toUpperCase(),
+                nivelPorVolumetria: volumetria.toUpperCase().replace('_', ' '),
+                nivelReal: nivelComplejidad,
+                cuentasBancarias: cuentas,
+                operacionesSinCFDI: opsSinCFDI,
+                porcentajeSinCFDI: porcentajeSinCFDI,
+                horasEstimadas: horasEstimadas,
+                factorComplejidad: complejidadTotal.toFixed(2)
+            };
+        }
+
+        // Lógica de determinación de perfiles (actualizada para multi-selección)
+        function determineProfiles(answers) {
+            const profiles = [];
+            const tiposPersona = answers.tipoPersona || [];
+            const actividadesPF = answers.actividadPrincipal || [];
+
+            // Personas Físicas
+            if (tiposPersona.includes('fisica')) {
+                if (actividadesPF.includes('profesionista')) {
+                    profiles.push({ 
+                        id: 'PF-01-PROF', 
+                        name: 'Profesionista Independiente', 
+                        code: 'PF-01-PROF', 
+                        range: answers.facturacionMensual, 
+                        services: { obligatorios: 10, opcionales: 4 } 
+                    });
+                }
+                if (actividadesPF.includes('arrendamiento')) {
+                    profiles.push({ 
+                        id: 'PF-02-ARREN', 
+                        name: 'Arrendador', 
+                        code: 'PF-02-ARREN', 
+                        range: answers.propiedadesArrendamiento, 
+                        services: { obligatorios: 7, opcionales: 3 } 
+                    });
+                }
+                if (actividadesPF.includes('empresarial')) {
+                    profiles.push({ 
+                        id: 'PF-04-RESICO', 
+                        name: 'Actividad Empresarial RESICO', 
+                        code: 'PF-04-RESICO', 
+                        range: answers.facturacionMensual, 
+                        services: { obligatorios: 10, opcionales: 3 } 
+                    });
+                }
+                if (actividadesPF.includes('asalariado')) {
+                    profiles.push({ 
+                        id: 'PF-03-ASAL', 
+                        name: 'Asalariado con Ingresos Adicionales', 
+                        code: 'PF-03-ASAL', 
+                        services: { obligatorios: 2, opcionales: 4 } 
+                    });
+                }
+                if (actividadesPF.includes('jubilado')) {
+                    profiles.push({ 
+                        id: 'PF-05-JUB', 
+                        name: 'Jubilado/Pensionado', 
+                        code: 'PF-05-JUB', 
+                        services: { obligatorios: 1, opcionales: 2 } 
+                    });
+                }
+            }
+
+            // Personas Morales
+            if (tiposPersona.includes('moral')) {
+                if (answers.tieneEmpleados === 'no') {
+                    profiles.push({ id: 'PM-01-SINEMP', name: 'Persona Moral Sin Empleados', code: 'PM-01-SINEMP', range: answers.facturacionMensualPM, services: { obligatorios: 17, opcionales: 4 } });
+                } else if (['1-5', '6-15'].includes(answers.tieneEmpleados)) {
+                    profiles.push({ id: 'PM-02-EMP-PEQ', name: 'Persona Moral con Empleados - Pequeña', code: 'PM-02-EMP-PEQ', range: answers.tieneEmpleados, services: { obligatorios: 28, opcionales: 3 } });
+                } else if (['16-50'].includes(answers.tieneEmpleados)) {
+                    profiles.push({ id: 'PM-03-EMP-MED', name: 'Persona Moral con Empleados - Mediana', code: 'PM-03-EMP-MED', range: answers.tieneEmpleados, services: { obligatorios: 32, opcionales: 6 } });
+                } else if (answers.tieneEmpleados === '50+') {
+                    profiles.push({ id: 'PM-04-EMP-GDE', name: 'Persona Moral Grande', code: 'PM-04-EMP-GDE', range: answers.tieneEmpleados, services: { obligatorios: 38, opcionales: 4 } });
+                }
+            }
+
+            if (answers.actividadesComplementarias) {
+                if (answers.actividadesComplementarias.includes('comercio')) {
+                    profiles.push({ id: 'ACT-01-COMER', name: 'Comercio al Por Menor', code: 'ACT-01-COMER', services: { obligatorios: 2, opcionales: 1 } });
+                }
+                if (answers.actividadesComplementarias.includes('manufactura')) {
+                    profiles.push({ id: 'ACT-03-MANUF', name: 'Manufactura', code: 'ACT-03-MANUF', services: { obligatorios: 3, opcionales: 2 } });
+                }
+                if (answers.actividadesComplementarias.includes('construccion')) {
+                    profiles.push({ id: 'ACT-04-CONST', name: 'Construcción', code: 'ACT-04-CONST', services: { obligatorios: 3, opcionales: 0 } });
+                }
+                if (answers.actividadesComplementarias.includes('restaurante')) {
+                    profiles.push({ id: 'ACT-05-REST', name: 'Restaurante/Alimentos', code: 'ACT-05-REST', services: { obligatorios: 2, opcionales: 1 } });
+                }
+                if (answers.actividadesComplementarias.includes('importacion')) {
+                    profiles.push({ id: 'ACT-06-COMEXT', name: 'Comercio Exterior', code: 'ACT-06-COMEXT', services: { obligatorios: 4, opcionales: 0 } });
+                }
+            }
+
+            if (['preoperacion', 'inicio'].includes(answers.etapaDelNegocio)) {
+                profiles.push({ id: 'ETA-01-START', name: 'Startup / Inicio de Operaciones', code: 'ETA-01-START', services: { obligatorios: 5, opcionales: 2 } });
+            }
+
+            if (answers.etapaDelNegocio === 'crecimiento') {
+                profiles.push({ id: 'ETA-02-CREC', name: 'En Crecimiento', code: 'ETA-02-CREC', services: { obligatorios: 2, opcionales: 2 } });
+            }
+
+            return profiles;
+        }
+
+        // Función para enviar datos a la API de Vercel
+        async function sendData(answers, profiles, complejidad, serviciosTotales) {
+            const fecha = new Date().toLocaleDateString('es-MX');
+            
+            const data = {
+                respuestas: answers,
+                perfiles: profiles,
+                complejidad: complejidad,
+                fecha: fecha,
+                serviciosTotales: serviciosTotales
+            };
+
+            try {
+                // Llamar a la API de Vercel
+                const response = await fetch('/api/send-questionnaire', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al enviar los datos');
+                }
+
+                const result = await response.json();
+                console.log('Datos enviados exitosamente:', result);
+                return true;
+
+            } catch (error) {
+                console.error('Error enviando datos:', error);
+                // Aún así mostrar pantalla de gracias
+                return true;
+            }
+        }
+
+        function App() {
+            const [currentStep, setCurrentStep] = useState(0);
+            const [answers, setAnswers] = useState({});
+            const [showThankYou, setShowThankYou] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
+
+            const visibleQuestions = QUESTIONS.filter(q => {
+                if (!q.condition) return true;
+                return q.condition(answers);
+            });
+
+            const currentQuestion = visibleQuestions[currentStep];
+            const progress = ((currentStep + 1) / visibleQuestions.length) * 100;
+
+            const handleAnswer = (questionId, value) => {
+                setAnswers(prev => ({ ...prev, [questionId]: value }));
+            };
+
+            const canProceed = () => {
+                if (!currentQuestion) return false;
+                const answer = answers[currentQuestion.id];
+                
+                if (currentQuestion.type === 'form') {
+                    const requiredFields = currentQuestion.fields.filter(f => f.required);
+                    return requiredFields.every(field => answer && answer[field.name] && answer[field.name].trim());
+                }
+
+                if (currentQuestion.type === 'multiple') {
+                    return answer && Array.isArray(answer) && answer.length > 0;
+                }
+
+                return answer !== undefined && answer !== null;
+            };
+
+            const handleNext = async () => {
+                if (currentStep < visibleQuestions.length - 1) {
+                    setCurrentStep(prev => prev + 1);
+                } else {
+                    // Finalizar cuestionario
+                    setIsLoading(true);
+                    const profiles = determineProfiles(answers);
+                    const complejidad = calcularComplejidad(answers);
+                    
+                    // Calcular totales
+                    const serviciosTotales = profiles.reduce((sum, p) => 
+                        sum + (p.services?.obligatorios || 0) + (p.services?.opcionales || 0), 0
+                    );
+                    
+                    try {
+                        await sendData(answers, profiles, complejidad, serviciosTotales);
+                        setIsLoading(false);
+                        setShowThankYou(true);
+                    } catch (error) {
+                        console.error('Error:', error);
+                        setIsLoading(false);
+                        setShowThankYou(true); // Mostrar pantalla de gracias de todos modos
+                    }
+                }
+            };
+
+            const handleBack = () => {
+                if (currentStep > 0) {
+                    setCurrentStep(prev => prev - 1);
+                }
+            };
+
+            if (showThankYou) {
+                return <ThankYouScreen clientData={answers.datosContacto} />;
+            }
+
+            return (
+                <div className="app-container">
+                    {isLoading && <LoadingOverlay />}
+                    
+                    <div className="brand-header">
+                        <div className="logo-container">
+                            <svg viewBox="0 0 1056.95 590.98" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1056.95,238.58c-9.81,14.72-22.07,25.93-36.78,33.63-14.72,7.71-30.01,11.56-45.89,11.56-4.44,0-9.34-.35-14.71-1.05-5.38-.7-10.81-1.81-16.29-3.33-5.49-1.52-10.81-3.5-15.94-5.95-5.14-2.45-9.81-5.31-14.02-8.58-2.34,2.1-5.02,4.26-8.06,6.48-3.04,2.22-6.48,4.26-10.34,6.13-3.85,1.87-8.06,3.39-12.61,4.55-4.55,1.17-9.63,1.75-15.24,1.75-7.71,0-14.66-1.23-20.84-3.68-6.19-2.45-11.45-5.78-15.77-9.98-4.32-4.21-7.65-9.17-9.98-14.89-2.34-5.72-3.5-11.85-3.5-18.39,0-7.71,1.46-14.94,4.38-21.73,2.92-6.77,6.83-13.08,11.74-18.92,4.9-5.84,10.45-10.98,16.64-15.41,6.19-4.43,12.55-8.06,19.09-10.86,0-7.47,1.58-15.7,4.73-24.69,3.15-8.99,7.53-17.4,13.14-25.23,5.6-7.82,12.14-14.36,19.62-19.62,7.47-5.25,15.53-7.88,24.17-7.88,6.31,0,11.56,1.81,15.76,5.43,4.21,3.63,6.31,8.82,6.31,15.59,0,6.08-2.51,11.74-7.53,16.99-5.02,5.26-11.04,10.16-18.04,14.72-7.01,4.55-14.19,8.58-21.54,12.08-7.36,3.51-13.26,6.54-17.69,9.11.23,15.89,3.62,31.07,10.16,45.55,6.54,14.48,15.3,27.33,26.28,38.54,8.64-7.71,16.46-15.99,23.47-24.88,7.01-8.87,13.72-17.11,20.15-24.7,6.42-7.58,12.84-13.89,19.27-18.92,6.42-5.02,13.25-7.53,20.49-7.53,6.07,0,11.15,1.63,15.24,4.9,4.08,3.27,6.13,7.59,6.13,12.96,0,1.87-.53,3.97-1.58,6.31-1.05,2.34-2.4,4.32-4.03,5.96-1.87-3.97-4.91-7.3-9.11-9.99-4.21-2.68-9.34-4.03-15.41-4.03-4.44,0-8.58.88-12.44,2.63-3.85,1.75-7.48,4.09-10.86,7.01-3.39,2.92-6.72,6.25-9.99,9.98-3.27,3.74-6.54,7.71-9.81,11.91-10.51,12.38-20.09,22.66-28.73,30.83,7.01,7.01,15.41,12.96,25.22,17.87,9.81,4.9,19.85,7.36,30.13,7.36,7.24,0,14.36-1.05,21.37-3.15,7.01-2.1,13.66-5.02,19.97-8.76,6.31-3.73,12.14-8.06,17.52-12.96,5.37-4.9,10.04-10.28,14.01-16.12l1.75,1.4ZM835.89,231.23c0,5.61.87,11.1,2.63,16.46,1.75,5.37,4.2,10.11,7.36,14.19,3.15,4.09,6.95,7.36,11.39,9.81,4.43,2.46,9.46,3.68,15.06,3.68,8.64,0,15.99-1.28,22.07-3.85,6.07-2.57,11.33-5.61,15.76-9.11-12.85-10.74-22.95-24-30.3-39.76-7.36-15.77-11.03-32.06-11.03-48.88-5.38,2.34-10.11,5.55-14.19,9.64-4.09,4.09-7.53,8.71-10.34,13.84-2.8,5.14-4.91,10.63-6.31,16.46-1.4,5.84-2.1,11.68-2.1,17.52ZM938.54,111.76c0-10.04-4.2-15.07-12.61-15.07-5.14,0-10.57,2.4-16.29,7.18-5.73,4.79-10.57,11.74-14.54,20.85-3.5,8.18-5.61,15.36-6.31,21.54-.7,6.19-1.05,11.62-1.05,16.29,6.77-3.03,13.25-6.19,19.44-9.46,6.19-3.27,11.62-6.89,16.29-10.86,4.67-3.97,8.35-8.46,11.04-13.49,2.68-5.02,4.03-10.68,4.03-16.99Z"/>
+                                <path d="M850.58,314.14s.07,133.49-.22,136.56c-1.03,19.59-23.61,27.17-39.75,20.77-5.7-2.26-10.12-6.68-12.76-12.1-1.7-3.49-2.31-7.4-2.41-11.29-1.62-58.08-38.05-109.29-97.03-123.44-16.94-4.79-36.38-7.18-58.33-7.18h-208.8v262.75h208.8c27.09,0,50.39-3.73,69.89-11.21,13.87-5.32,25.93-11.95,36.25-19.87,26.13,26.45,72.62,44.22,112.89,41.58,39.15.42,71.27-8.61,99.37-30.99,26.41-20.03,37.63-48.95,37.48-84.79v-160.8h-145.39ZM647.93,463.51l-35.17,35.17c-18.04,18.04-47.28,18.04-65.31,0-18.04-18.04-18.04-47.28,0-65.31l35.17-35.17c18.04-18.04,47.28-18.04,65.31,0h0c18.04,18.04,18.04,47.28,0,65.31Z"/>
+                                <path d="M612.88,192.13c-18.04,18.04-47.28,18.04-65.31,0-18.04-18.04-18.04-47.28,0-65.31l35.17-35.17c18.04-18.04,47.28-18.04,65.31,0h0c10.42,10.42,14.68,24.57,13.04,38.15l126.04-27.01c-5.1-18.47-13.8-34.66-26.24-48.48-15.76-17.51-37.2-30.94-64.29-40.29-27.1-9.34-60.03-14.02-98.8-14.02-21.96,0-42.63,1.82-62.01,5.43-19.39,3.63-37.08,9.17-53.08,16.64-16,7.48-29.78,16.82-41.34,28.03-7.57,7.34-13.9,15.68-19.22,24.83V10.51h-176.57l-28.03,129.97c0,.24-.06.41-.17.53-.12.12-.24.12-.35,0-.12-.11-.18-.29-.18-.53-3.27-14.48-6.6-28.96-9.98-43.44-3.39-14.48-6.72-28.9-9.99-43.26-3.27-14.36-6.65-28.79-10.16-43.27H0v210.03c0,29.12,23.61,52.73,52.73,52.73h22.42c29.12,0,52.73-23.61,52.73-52.73v-91.96c0-.23.11-.35.35-.35s.35.12.35.35c5.84,24.06,11.56,48.12,17.17,72.17,2.48,10.64,4.98,21.29,7.5,31.97,5.61,23.74,26.77,40.54,51.17,40.54h6.22c24.38,0,45.56-16.77,51.15-40.5l24.79-105.24c0-.23.05-.35.18-.35h.35c.12,0,.18.12.18.35v93.19c0,29.02,23.53,52.55,52.55,52.55h29.78c29.02,0,52.55-23.53,52.55-52.55v-11.78c5.01,8.52,11.09,16.44,18.35,23.7,7.94,7.94,17.11,15.06,27.5,21.37,10.39,6.31,22.19,11.68,35.38,16.12,13.19,4.43,27.62,7.82,43.27,10.16,15.65,2.33,32.7,3.5,51.15,3.5,31.3,0,58.45-3.33,81.45-9.98,23-6.66,42.27-15.82,57.81-27.5,15.53-11.68,27.68-25.1,36.44-40.29,8.76-15.18,14.42-31.41,16.99-48.7l-133.29-13.48c-2.22,4.75-44.32,48.31-44.32,48.31Z"/>
+                            </svg>
+                        </div>
+                        <h1>MC&DJ Consultores Profesionales</h1>
+                        <p>Cuestionario para nuevos clientes - Nos ayudará a diseñar la mejor solución para ti</p>
+                    </div>
+
+                    <div className="questionnaire-card">
+                        <div className="progress-bar-container">
+                            <div className="progress-info">
+                                <span className="progress-label">Progreso del cuestionario</span>
+                                <span className="progress-count">
+                                    Pregunta {currentStep + 1} de {visibleQuestions.length}
+                                </span>
+                            </div>
+                            <div className="progress-bar">
+                                <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+                            </div>
+                        </div>
+
+                        <div className="question-container">
+                            <div className="question-number">Pregunta {currentStep + 1}</div>
+                            <h2 className="question-title">{currentQuestion.title}</h2>
+                            <p className="question-subtitle">{currentQuestion.subtitle}</p>
+
+                            {currentQuestion.type === 'single' && (
+                                <div className="options-grid">
+                                    {currentQuestion.options.map(option => (
+                                        <div
+                                            key={option.value}
+                                            className={`option-card ${answers[currentQuestion.id] === option.value ? 'selected' : ''}`}
+                                            onClick={() => handleAnswer(currentQuestion.id, option.value)}
+                                        >
+                                            <div className="option-radio"></div>
+                                            <div className="option-content">
+                                                <div className="option-label">{option.label}</div>
+                                                {option.description && (
+                                                    <div className="option-description">{option.description}</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {currentQuestion.type === 'multiple' && (
+                                <div className="checkbox-group">
+                                    {currentQuestion.options.map(option => {
+                                        const currentAnswers = answers[currentQuestion.id] || [];
+                                        const isChecked = currentAnswers.includes(option.value);
+                                        
+                                        return (
+                                            <div
+                                                key={option.value}
+                                                className={`checkbox-item ${isChecked ? 'checked' : ''}`}
+                                                onClick={() => {
+                                                    const newAnswers = isChecked
+                                                        ? currentAnswers.filter(v => v !== option.value)
+                                                        : [...currentAnswers, option.value];
+                                                    handleAnswer(currentQuestion.id, newAnswers);
+                                                }}
+                                            >
+                                                <div className="checkbox-box"></div>
+                                                <div>
+                                                    <div className="checkbox-label">{option.label}</div>
+                                                    {option.description && (
+                                                        <div className="option-description">{option.description}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {currentQuestion.type === 'form' && (
+                                <div>
+                                    {currentQuestion.fields.map(field => (
+                                        <div key={field.name} className="input-group">
+                                            <label className="input-label">
+                                                {field.label}
+                                                {field.required && <span style={{ color: 'var(--orange)' }}> *</span>}
+                                            </label>
+                                            {field.type === 'textarea' ? (
+                                                <textarea
+                                                    className="input-field"
+                                                    rows="4"
+                                                    value={answers[currentQuestion.id]?.[field.name] || ''}
+                                                    onChange={(e) => {
+                                                        const formData = answers[currentQuestion.id] || {};
+                                                        handleAnswer(currentQuestion.id, {
+                                                            ...formData,
+                                                            [field.name]: e.target.value
+                                                        });
+                                                    }}
+                                                />
+                                            ) : (
+                                                <input
+                                                    type={field.type}
+                                                    className="input-field"
+                                                    value={answers[currentQuestion.id]?.[field.name] || ''}
+                                                    onChange={(e) => {
+                                                        const formData = answers[currentQuestion.id] || {};
+                                                        handleAnswer(currentQuestion.id, {
+                                                            ...formData,
+                                                            [field.name]: e.target.value
+                                                        });
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="navigation-buttons">
+                            {currentStep > 0 && (
+                                <button className="btn btn-back" onClick={handleBack}>
+                                    ← Anterior
+                                </button>
+                            )}
+                            <button
+                                className={`btn ${currentStep === visibleQuestions.length - 1 ? 'btn-submit' : 'btn-next'}`}
+                                onClick={handleNext}
+                                disabled={!canProceed()}
+                            >
+                                {currentStep === visibleQuestions.length - 1 ? '✓ Enviar' : 'Siguiente →'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function LoadingOverlay() {
+            return (
+                <div className="loading-overlay">
+                    <div className="loading-content">
+                        <div className="spinner"></div>
+                        <div className="loading-text">Procesando tu información...</div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ThankYouScreen({ clientData }) {
+            return (
+                <div className="app-container">
+                    <div className="brand-header">
+                        <div className="logo-container">
+                            <svg viewBox="0 0 1056.95 590.98" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1056.95,238.58c-9.81,14.72-22.07,25.93-36.78,33.63-14.72,7.71-30.01,11.56-45.89,11.56-4.44,0-9.34-.35-14.71-1.05-5.38-.7-10.81-1.81-16.29-3.33-5.49-1.52-10.81-3.5-15.94-5.95-5.14-2.45-9.81-5.31-14.02-8.58-2.34,2.1-5.02,4.26-8.06,6.48-3.04,2.22-6.48,4.26-10.34,6.13-3.85,1.87-8.06,3.39-12.61,4.55-4.55,1.17-9.63,1.75-15.24,1.75-7.71,0-14.66-1.23-20.84-3.68-6.19-2.45-11.45-5.78-15.77-9.98-4.32-4.21-7.65-9.17-9.98-14.89-2.34-5.72-3.5-11.85-3.5-18.39,0-7.71,1.46-14.94,4.38-21.73,2.92-6.77,6.83-13.08,11.74-18.92,4.9-5.84,10.45-10.98,16.64-15.41,6.19-4.43,12.55-8.06,19.09-10.86,0-7.47,1.58-15.7,4.73-24.69,3.15-8.99,7.53-17.4,13.14-25.23,5.6-7.82,12.14-14.36,19.62-19.62,7.47-5.25,15.53-7.88,24.17-7.88,6.31,0,11.56,1.81,15.76,5.43,4.21,3.63,6.31,8.82,6.31,15.59,0,6.08-2.51,11.74-7.53,16.99-5.02,5.26-11.04,10.16-18.04,14.72-7.01,4.55-14.19,8.58-21.54,12.08-7.36,3.51-13.26,6.54-17.69,9.11.23,15.89,3.62,31.07,10.16,45.55,6.54,14.48,15.3,27.33,26.28,38.54,8.64-7.71,16.46-15.99,23.47-24.88,7.01-8.87,13.72-17.11,20.15-24.7,6.42-7.58,12.84-13.89,19.27-18.92,6.42-5.02,13.25-7.53,20.49-7.53,6.07,0,11.15,1.63,15.24,4.9,4.08,3.27,6.13,7.59,6.13,12.96,0,1.87-.53,3.97-1.58,6.31-1.05,2.34-2.4,4.32-4.03,5.96-1.87-3.97-4.91-7.3-9.11-9.99-4.21-2.68-9.34-4.03-15.41-4.03-4.44,0-8.58.88-12.44,2.63-3.85,1.75-7.48,4.09-10.86,7.01-3.39,2.92-6.72,6.25-9.99,9.98-3.27,3.74-6.54,7.71-9.81,11.91-10.51,12.38-20.09,22.66-28.73,30.83,7.01,7.01,15.41,12.96,25.22,17.87,9.81,4.9,19.85,7.36,30.13,7.36,7.24,0,14.36-1.05,21.37-3.15,7.01-2.1,13.66-5.02,19.97-8.76,6.31-3.73,12.14-8.06,17.52-12.96,5.37-4.9,10.04-10.28,14.01-16.12l1.75,1.4ZM835.89,231.23c0,5.61.87,11.1,2.63,16.46,1.75,5.37,4.2,10.11,7.36,14.19,3.15,4.09,6.95,7.36,11.39,9.81,4.43,2.46,9.46,3.68,15.06,3.68,8.64,0,15.99-1.28,22.07-3.85,6.07-2.57,11.33-5.61,15.76-9.11-12.85-10.74-22.95-24-30.3-39.76-7.36-15.77-11.03-32.06-11.03-48.88-5.38,2.34-10.11,5.55-14.19,9.64-4.09,4.09-7.53,8.71-10.34,13.84-2.8,5.14-4.91,10.63-6.31,16.46-1.4,5.84-2.1,11.68-2.1,17.52ZM938.54,111.76c0-10.04-4.2-15.07-12.61-15.07-5.14,0-10.57,2.4-16.29,7.18-5.73,4.79-10.57,11.74-14.54,20.85-3.5,8.18-5.61,15.36-6.31,21.54-.7,6.19-1.05,11.62-1.05,16.29,6.77-3.03,13.25-6.19,19.44-9.46,6.19-3.27,11.62-6.89,16.29-10.86,4.67-3.97,8.35-8.46,11.04-13.49,2.68-5.02,4.03-10.68,4.03-16.99Z"/>
+                                <path d="M850.58,314.14s.07,133.49-.22,136.56c-1.03,19.59-23.61,27.17-39.75,20.77-5.7-2.26-10.12-6.68-12.76-12.1-1.7-3.49-2.31-7.4-2.41-11.29-1.62-58.08-38.05-109.29-97.03-123.44-16.94-4.79-36.38-7.18-58.33-7.18h-208.8v262.75h208.8c27.09,0,50.39-3.73,69.89-11.21,13.87-5.32,25.93-11.95,36.25-19.87,26.13,26.45,72.62,44.22,112.89,41.58,39.15.42,71.27-8.61,99.37-30.99,26.41-20.03,37.63-48.95,37.48-84.79v-160.8h-145.39ZM647.93,463.51l-35.17,35.17c-18.04,18.04-47.28,18.04-65.31,0-18.04-18.04-18.04-47.28,0-65.31l35.17-35.17c18.04-18.04,47.28-18.04,65.31,0h0c18.04,18.04,18.04,47.28,0,65.31Z"/>
+                                <path d="M612.88,192.13c-18.04,18.04-47.28,18.04-65.31,0-18.04-18.04-18.04-47.28,0-65.31l35.17-35.17c18.04-18.04,47.28-18.04,65.31,0h0c10.42,10.42,14.68,24.57,13.04,38.15l126.04-27.01c-5.1-18.47-13.8-34.66-26.24-48.48-15.76-17.51-37.2-30.94-64.29-40.29-27.1-9.34-60.03-14.02-98.8-14.02-21.96,0-42.63,1.82-62.01,5.43-19.39,3.63-37.08,9.17-53.08,16.64-16,7.48-29.78,16.82-41.34,28.03-7.57,7.34-13.9,15.68-19.22,24.83V10.51h-176.57l-28.03,129.97c0,.24-.06.41-.17.53-.12.12-.24.12-.35,0-.12-.11-.18-.29-.18-.53-3.27-14.48-6.6-28.96-9.98-43.44-3.39-14.48-6.72-28.9-9.99-43.26-3.27-14.36-6.65-28.79-10.16-43.27H0v210.03c0,29.12,23.61,52.73,52.73,52.73h22.42c29.12,0,52.73-23.61,52.73-52.73v-91.96c0-.23.11-.35.35-.35s.35.12.35.35c5.84,24.06,11.56,48.12,17.17,72.17,2.48,10.64,4.98,21.29,7.5,31.97,5.61,23.74,26.77,40.54,51.17,40.54h6.22c24.38,0,45.56-16.77,51.15-40.5l24.79-105.24c0-.23.05-.35.18-.35h.35c.12,0,.18.12.18.35v93.19c0,29.02,23.53,52.55,52.55,52.55h29.78c29.02,0,52.55-23.53,52.55-52.55v-11.78c5.01,8.52,11.09,16.44,18.35,23.7,7.94,7.94,17.11,15.06,27.5,21.37,10.39,6.31,22.19,11.68,35.38,16.12,13.19,4.43,27.62,7.82,43.27,10.16,15.65,2.33,32.7,3.5,51.15,3.5,31.3,0,58.45-3.33,81.45-9.98,23-6.66,42.27-15.82,57.81-27.5,15.53-11.68,27.68-25.1,36.44-40.29,8.76-15.18,14.42-31.41,16.99-48.7l-133.29-13.48c-2.22,4.75-44.32,48.31-44.32,48.31Z"/>
+                            </svg>
+                        </div>
+                        <h1>MC&DJ Consultores Profesionales</h1>
+                        <p>Tres décadas de experiencia a tu servicio</p>
+                    </div>
+
+                    <div className="questionnaire-card thank-you-container">
+                        <div className="success-icon">✓</div>
+                        <h1 className="thank-you-title">¡Gracias{clientData?.nombre ? `, ${clientData.nombre.split(' ')[0]}` : ''}!</h1>
+                        <p className="thank-you-subtitle">
+                            Hemos recibido tu información correctamente. Nuestro equipo la está revisando 
+                            y nos pondremos en contacto contigo muy pronto.
+                        </p>
+
+                        <div className="next-steps-box">
+                            <h3 className="next-steps-title">¿Qué sigue ahora?</h3>
+                            
+                            <div className="step-item">
+                                <div className="step-icon">1</div>
+                                <div className="step-content">
+                                    <div className="step-title">Análisis de tu caso</div>
+                                    <div className="step-desc">
+                                        Nuestros consultores revisarán tu información para preparar la mejor propuesta
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="step-item">
+                                <div className="step-icon">2</div>
+                                <div className="step-content">
+                                    <div className="step-title">Contacto en 24 horas</div>
+                                    <div className="step-desc">
+                                        Te llamaremos o enviaremos un email para agendar una reunión
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="step-item">
+                                <div className="step-icon">3</div>
+                                <div className="step-content">
+                                    <div className="step-title">Propuesta personalizada</div>
+                                    <div className="step-desc">
+                                        Te presentaremos una cotización ajustada a tus necesidades específicas
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="step-item">
+                                <div className="step-icon">4</div>
+                                <div className="step-content">
+                                    <div className="step-title">Inicio de servicios</div>
+                                    <div className="step-desc">
+                                        Una vez aprobado, comenzamos a trabajar juntos en tu éxito fiscal y contable
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="contact-info">
+                            <div className="contact-title">Si tienes alguna duda, contáctanos:</div>
+                            <div className="contact-item">
+                                📧 contacto@mcydj.mx
+                            </div>
+                            <div className="contact-item">
+                                📱 +52 (999) 987 1518
+                            </div>
+                            <div className="contact-item">
+                                📱 +52 (999) 987 5250
+                            </div>
+                            <div className="contact-item">
+                                📍 Calle 31 No. 226 x 24 y 26, Col. Miguel Alemán, Mérida, Yucatán
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
