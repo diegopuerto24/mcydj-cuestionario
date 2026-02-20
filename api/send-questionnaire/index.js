@@ -2,13 +2,355 @@
  * API Endpoint: /api/send-questionnaire
  * MC&DJ Consultores Profesionales
  * 
- * Procesa respuestas del cuestionario y envía email usando Resend
- * Versión 2.0 - Con dimensionamiento por volumetría operativa
+ * Versión 3.0 - Con detalle completo de servicios por perfil
  */
 
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+/**
+ * CATÁLOGO COMPLETO DE SERVICIOS
+ */
+const CATALOGO_SERVICIOS = {
+  // SERVICIOS OBLIGATORIOS GENERALES
+  'CON-GEN-001': {
+    codigo: 'CON-GEN-001',
+    nombre: 'Registro Contable Mensual',
+    descripcion: 'Captura y clasificación de todas las operaciones del mes',
+    categoria: 'Contabilidad General',
+    periodicidad: 'Mensual'
+  },
+  'CON-GEN-002': {
+    codigo: 'CON-GEN-002',
+    nombre: 'Conciliaciones Bancarias',
+    descripcion: 'Conciliación de cuentas bancarias según volumen de operaciones',
+    categoria: 'Contabilidad General',
+    periodicidad: 'Mensual'
+  },
+  'CON-GEN-003': {
+    codigo: 'CON-GEN-003',
+    nombre: 'Estados Financieros Básicos',
+    descripcion: 'Balance General y Estado de Resultados',
+    categoria: 'Contabilidad General',
+    periodicidad: 'Mensual'
+  },
+  'FIS-DEC-001': {
+    codigo: 'FIS-DEC-001',
+    nombre: 'Declaración Mensual ISR',
+    descripcion: 'Cálculo y presentación del Impuesto Sobre la Renta mensual',
+    categoria: 'Declaraciones Fiscales',
+    periodicidad: 'Mensual'
+  },
+  'FIS-DEC-002': {
+    codigo: 'FIS-DEC-002',
+    nombre: 'Declaración Mensual IVA',
+    descripcion: 'Cálculo y presentación del IVA trasladado y acreditable',
+    categoria: 'Declaraciones Fiscales',
+    periodicidad: 'Mensual'
+  },
+  'FIS-DEC-003': {
+    codigo: 'FIS-DEC-003',
+    nombre: 'DIOT (Declaración Informativa)',
+    descripcion: 'Declaración Informativa de Operaciones con Terceros',
+    categoria: 'Declaraciones Fiscales',
+    periodicidad: 'Mensual'
+  },
+  'FIS-CUM-001': {
+    codigo: 'FIS-CUM-001',
+    nombre: 'Revisión de Cumplimiento Mensual',
+    descripcion: 'Verificación de obligaciones fiscales cumplidas',
+    categoria: 'Cumplimiento Fiscal',
+    periodicidad: 'Mensual'
+  },
+  'ADM-GES-001': {
+    codigo: 'ADM-GES-001',
+    nombre: 'Gestión Documental Básica',
+    descripcion: 'Archivo y organización de documentación soporte',
+    categoria: 'Administración',
+    periodicidad: 'Mensual'
+  },
+  
+  // SERVICIOS ESPECÍFICOS POR ACTIVIDAD
+  'CON-INV-001': {
+    codigo: 'CON-INV-001',
+    nombre: 'Control de Inventarios',
+    descripcion: 'Registro y valuación de inventarios (PEPS/Promedio)',
+    categoria: 'Contabilidad Especializada',
+    periodicidad: 'Mensual'
+  },
+  'CON-ACT-001': {
+    codigo: 'CON-ACT-001',
+    nombre: 'Control de Activos Fijos',
+    descripcion: 'Registro de activos fijos y cálculo de depreciaciones',
+    categoria: 'Contabilidad Especializada',
+    periodicidad: 'Mensual'
+  },
+  'FIS-NOM-001': {
+    codigo: 'FIS-NOM-001',
+    nombre: 'Procesamiento de Nómina',
+    descripcion: 'Cálculo de nómina, IMSS, retenciones y entero',
+    categoria: 'Nómina y RH',
+    periodicidad: 'Semanal/Quincenal'
+  },
+  'FIS-NOM-002': {
+    codigo: 'FIS-NOM-002',
+    nombre: 'Declaraciones de Nómina',
+    descripcion: 'Entero IMSS, retenciones ISR, declaraciones informativas',
+    categoria: 'Nómina y RH',
+    periodicidad: 'Mensual/Bimestral'
+  },
+  'CON-GEN-010': {
+    codigo: 'CON-GEN-010',
+    nombre: 'Clasificación Operaciones Sin CFDI',
+    descripcion: 'Procesamiento de operaciones bancarias sin comprobante fiscal',
+    categoria: 'Contabilidad General',
+    periodicidad: 'Mensual'
+  },
+  
+  // SERVICIOS OPCIONALES
+  'FIS-PLA-001': {
+    codigo: 'FIS-PLA-001',
+    nombre: 'Planeación Fiscal Básica',
+    descripcion: 'Estrategias de optimización fiscal y aprovechamiento de deducciones',
+    categoria: 'Planeación Fiscal',
+    periodicidad: 'Trimestral'
+  },
+  'FIS-PLA-002': {
+    codigo: 'FIS-PLA-002',
+    nombre: 'Proyecciones Fiscales',
+    descripcion: 'Estimación de impuestos anuales y provisiones',
+    categoria: 'Planeación Fiscal',
+    periodicidad: 'Trimestral'
+  },
+  'CON-FIN-001': {
+    codigo: 'CON-FIN-001',
+    nombre: 'Análisis Financiero Básico',
+    descripcion: 'Indicadores financieros y razones de liquidez',
+    categoria: 'Análisis Financiero',
+    periodicidad: 'Mensual'
+  },
+  'CON-FIN-002': {
+    codigo: 'CON-FIN-002',
+    nombre: 'Flujo de Efectivo',
+    descripcion: 'Estado de flujo de efectivo y proyecciones',
+    categoria: 'Análisis Financiero',
+    periodicidad: 'Mensual'
+  },
+  'FIS-REV-001': {
+    codigo: 'FIS-REV-001',
+    nombre: 'Revisión de Deducibles',
+    descripcion: 'Análisis de gastos deducibles vs no deducibles',
+    categoria: 'Cumplimiento Fiscal',
+    periodicidad: 'Mensual'
+  },
+  'ADM-GES-002': {
+    codigo: 'ADM-GES-002',
+    nombre: 'Gestión de Cobranza',
+    descripcion: 'Seguimiento de cuentas por cobrar y antigüedad',
+    categoria: 'Administración',
+    periodicidad: 'Mensual'
+  },
+  'ADM-GES-003': {
+    codigo: 'ADM-GES-003',
+    nombre: 'Control Presupuestal',
+    descripcion: 'Comparativo presupuesto vs real y variaciones',
+    categoria: 'Administración',
+    periodicidad: 'Mensual'
+  }
+};
+
+/**
+ * DEFINICIÓN DE PERFILES CON SERVICIOS
+ */
+const PERFILES_SERVICIOS = {
+  'PF-01-PROF': {
+    nombre: 'Profesionista Independiente',
+    codigo: 'PF-01-PROF',
+    descripcion: 'Persona Física con actividad empresarial y profesional',
+    obligatorios: [
+      'CON-GEN-001', // Registro Contable
+      'CON-GEN-002', // Conciliaciones
+      'CON-GEN-003', // Estados Financieros
+      'FIS-DEC-001', // ISR Mensual
+      'FIS-DEC-002', // IVA Mensual
+      'FIS-DEC-003', // DIOT
+      'FIS-CUM-001', // Cumplimiento
+      'ADM-GES-001', // Gestión Documental
+      'FIS-REV-001', // Revisión Deducibles
+      'CON-FIN-001'  // Análisis Financiero
+    ],
+    opcionales: [
+      'FIS-PLA-001', // Planeación Fiscal
+      'FIS-PLA-002', // Proyecciones
+      'CON-FIN-002', // Flujo de Efectivo
+      'ADM-GES-003'  // Control Presupuestal
+    ]
+  },
+  'PM-01-SINEMP': {
+    nombre: 'Persona Moral sin Empleados',
+    codigo: 'PM-01-SINEMP',
+    descripcion: 'Empresa constituida sin empleados formales',
+    obligatorios: [
+      'CON-GEN-001',
+      'CON-GEN-002',
+      'CON-GEN-003',
+      'FIS-DEC-001',
+      'FIS-DEC-002',
+      'FIS-DEC-003',
+      'FIS-CUM-001',
+      'ADM-GES-001'
+    ],
+    opcionales: [
+      'FIS-PLA-001',
+      'FIS-PLA-002',
+      'CON-FIN-001',
+      'CON-FIN-002',
+      'ADM-GES-002'
+    ]
+  },
+  'PM-02-EMP-PEQ': {
+    nombre: 'Persona Moral con Empleados (1-15)',
+    codigo: 'PM-02-EMP-PEQ',
+    descripcion: 'Empresa con nómina pequeña',
+    obligatorios: [
+      'CON-GEN-001',
+      'CON-GEN-002',
+      'CON-GEN-003',
+      'FIS-DEC-001',
+      'FIS-DEC-002',
+      'FIS-DEC-003',
+      'FIS-CUM-001',
+      'ADM-GES-001',
+      'FIS-NOM-001', // Nómina
+      'FIS-NOM-002'  // Declaraciones Nómina
+    ],
+    opcionales: [
+      'FIS-PLA-001',
+      'CON-FIN-001',
+      'CON-FIN-002',
+      'ADM-GES-002',
+      'ADM-GES-003'
+    ]
+  },
+  'PM-03-EMP-MED': {
+    nombre: 'Persona Moral con Empleados (16-50)',
+    codigo: 'PM-03-EMP-MED',
+    descripcion: 'Empresa con nómina mediana',
+    obligatorios: [
+      'CON-GEN-001',
+      'CON-GEN-002',
+      'CON-GEN-003',
+      'FIS-DEC-001',
+      'FIS-DEC-002',
+      'FIS-DEC-003',
+      'FIS-CUM-001',
+      'ADM-GES-001',
+      'FIS-NOM-001',
+      'FIS-NOM-002',
+      'CON-FIN-001' // Obligatorio para este nivel
+    ],
+    opcionales: [
+      'FIS-PLA-001',
+      'FIS-PLA-002',
+      'CON-FIN-002',
+      'ADM-GES-002',
+      'ADM-GES-003'
+    ]
+  },
+  'ACT-01-COMER': {
+    nombre: 'Comercio al Por Menor',
+    codigo: 'ACT-01-COMER',
+    descripcion: 'Actividad comercial con manejo de inventarios',
+    obligatorios: [
+      'CON-INV-001', // Control Inventarios
+      'ADM-GES-002'  // Cobranza
+    ],
+    opcionales: [
+      'CON-FIN-002' // Flujo de Efectivo
+    ]
+  },
+  'ACT-02-SERV': {
+    nombre: 'Prestación de Servicios',
+    codigo: 'ACT-02-SERV',
+    descripcion: 'Servicios profesionales o técnicos',
+    obligatorios: [],
+    opcionales: [
+      'CON-FIN-001',
+      'ADM-GES-002'
+    ]
+  },
+  'ACT-03-MANUF': {
+    nombre: 'Manufactura',
+    codigo: 'ACT-03-MANUF',
+    descripcion: 'Fabricación y transformación de productos',
+    obligatorios: [
+      'CON-INV-001', // Control Inventarios
+      'CON-ACT-001'  // Activos Fijos
+    ],
+    opcionales: [
+      'CON-FIN-001',
+      'CON-FIN-002',
+      'ADM-GES-003'
+    ]
+  },
+  'ACT-05-REST': {
+    nombre: 'Restaurante / Alimentos',
+    codigo: 'ACT-05-REST',
+    descripcion: 'Servicio de alimentos con propinas y efectivo',
+    obligatorios: [
+      'CON-INV-001',      // Inventarios de alimentos
+      'CON-GEN-010'       // Ops sin CFDI (propinas, efectivo)
+    ],
+    opcionales: [
+      'CON-FIN-002',
+      'ADM-GES-002'
+    ]
+  },
+  'ETA-01-START': {
+    nombre: 'Startup / Inicio de Operaciones',
+    codigo: 'ETA-01-START',
+    descripcion: 'Empresa en fase inicial (menos de 1 año)',
+    obligatorios: [
+      'FIS-PLA-001',  // Planeación fundamental
+      'CON-FIN-001',  // Análisis mensual
+      'CON-FIN-002',  // Flujo de efectivo crítico
+      'ADM-GES-001',  // Orden documental
+      'FIS-REV-001'   // Optimización deducibles
+    ],
+    opcionales: [
+      'FIS-PLA-002',
+      'ADM-GES-003'
+    ]
+  },
+  'ETA-02-CREC': {
+    nombre: 'En Crecimiento',
+    codigo: 'ETA-02-CREC',
+    descripcion: 'Empresa en expansión activa',
+    obligatorios: [
+      'CON-FIN-001',  // Indicadores clave
+      'CON-FIN-002'   // Proyecciones flujo
+    ],
+    opcionales: [
+      'FIS-PLA-001',
+      'FIS-PLA-002',
+      'ADM-GES-003'
+    ]
+  },
+  'ETA-03-CONS': {
+    nombre: 'Consolidado',
+    codigo: 'ETA-03-CONS',
+    descripcion: 'Empresa madura y estable',
+    obligatorios: [
+      'FIS-PLA-001'  // Optimización fiscal
+    ],
+    opcionales: [
+      'FIS-PLA-002',
+      'CON-FIN-001',
+      'ADM-GES-003'
+    ]
+  }
+};
 
 /**
  * Mapea valores técnicos a etiquetas legibles
@@ -61,18 +403,117 @@ const LABELS = {
 };
 
 /**
+ * Obtener detalle completo de servicios por perfil
+ */
+function obtenerDetalleServicios(perfiles) {
+  return perfiles.map(perfil => {
+    const perfilInfo = PERFILES_SERVICIOS[perfil.code];
+    if (!perfilInfo) return null;
+    
+    const serviciosObligatorios = perfilInfo.obligatorios.map(codigo => ({
+      ...CATALOGO_SERVICIOS[codigo],
+      tipo: 'Obligatorio'
+    }));
+    
+    const serviciosOpcionales = perfilInfo.opcionales.map(codigo => ({
+      ...CATALOGO_SERVICIOS[codigo],
+      tipo: 'Opcional'
+    }));
+    
+    return {
+      perfil: perfil.name,
+      codigo: perfil.code,
+      descripcion: perfilInfo.descripcion,
+      serviciosObligatorios,
+      serviciosOpcionales,
+      totales: {
+        obligatorios: serviciosObligatorios.length,
+        opcionales: serviciosOpcionales.length,
+        total: serviciosObligatorios.length + serviciosOpcionales.length
+      }
+    };
+  }).filter(Boolean);
+}
+
+/**
+ * Genera tabla HTML de servicios por perfil
+ */
+function generarTablaServicios(detalleServicios) {
+  return detalleServicios.map(perfil => `
+    <div class="perfil-detalle">
+      <h3 class="perfil-titulo">${perfil.perfil}</h3>
+      <p class="perfil-descripcion">${perfil.descripcion}</p>
+      <p class="perfil-codigo"><strong>Código:</strong> ${perfil.codigo}</p>
+      
+      <div class="servicios-seccion">
+        <h4 class="servicios-subtitulo">✅ Servicios Obligatorios (${perfil.serviciosObligatorios.length})</h4>
+        <table class="tabla-servicios">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Servicio</th>
+              <th>Descripción</th>
+              <th>Periodicidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${perfil.serviciosObligatorios.map(s => `
+              <tr>
+                <td><code>${s.codigo}</code></td>
+                <td><strong>${s.nombre}</strong></td>
+                <td>${s.descripcion}</td>
+                <td>${s.periodicidad}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      
+      ${perfil.serviciosOpcionales.length > 0 ? `
+      <div class="servicios-seccion">
+        <h4 class="servicios-subtitulo">💡 Servicios Opcionales (${perfil.serviciosOpcionales.length})</h4>
+        <table class="tabla-servicios">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Servicio</th>
+              <th>Descripción</th>
+              <th>Periodicidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${perfil.serviciosOpcionales.map(s => `
+              <tr>
+                <td><code>${s.codigo}</code></td>
+                <td><strong>${s.nombre}</strong></td>
+                <td>${s.descripcion}</td>
+                <td>${s.periodicidad}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+/**
  * Genera el HTML del email con la información completa
  */
 function generarEmailHTML(data) {
   const { respuestas, perfiles, complejidad, fecha, serviciosTotales } = data;
   const contacto = respuestas.datosContacto || {};
   
-  // Calcular totales de servicios
+  // Obtener detalle completo de servicios
+  const detalleServicios = obtenerDetalleServicios(perfiles);
+  
+  // Calcular totales
   let totalObligatorios = 0;
   let totalOpcionales = 0;
-  perfiles.forEach(p => {
-    totalObligatorios += p.services?.obligatorios || 0;
-    totalOpcionales += p.services?.opcionales || 0;
+  detalleServicios.forEach(p => {
+    totalObligatorios += p.totales.obligatorios;
+    totalOpcionales += p.totales.opcionales;
   });
 
   // Determinar rango de cotización
@@ -124,7 +565,7 @@ function generarEmailHTML(data) {
       padding: 0;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 20px auto;
       background: white;
       border-radius: 12px;
@@ -234,48 +675,75 @@ function generarEmailHTML(data) {
     .alert-verde { border-color: #4CAF50; color: #2E7D32; }
     .alert-amarilla { border-color: #FFC107; color: #F57C00; }
     .alert-roja { border-color: #F44336; color: #C62828; }
-    .profile-list {
-      list-style: none;
-      padding: 0;
-      margin: 15px 0;
-    }
-    .profile-item {
+    
+    /* ESTILOS PARA TABLAS DE SERVICIOS */
+    .perfil-detalle {
       background: #f9f9f9;
-      padding: 15px 20px;
-      margin-bottom: 10px;
+      padding: 20px;
+      margin-bottom: 25px;
       border-radius: 8px;
       border-left: 4px solid #F65904;
     }
-    .profile-name {
+    .perfil-titulo {
+      font-size: 20px;
       font-weight: 700;
-      font-size: 16px;
       color: #16150E;
-      margin-bottom: 5px;
+      margin: 0 0 10px 0;
     }
-    .profile-code {
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      color: #666;
-      background: #e8e8e8;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-right: 10px;
-    }
-    .profile-services {
+    .perfil-descripcion {
       font-size: 14px;
       color: #666;
-      margin-top: 5px;
+      margin: 5px 0;
     }
-    .services-badge {
-      display: inline-block;
-      background: #A0C7FE;
-      color: #16150E;
-      padding: 4px 10px;
-      border-radius: 12px;
+    .perfil-codigo {
       font-size: 13px;
-      font-weight: 600;
-      margin-right: 8px;
+      color: #666;
+      margin: 5px 0 15px 0;
     }
+    .servicios-seccion {
+      margin: 20px 0;
+    }
+    .servicios-subtitulo {
+      font-size: 16px;
+      font-weight: 700;
+      color: #16150E;
+      margin-bottom: 10px;
+    }
+    .tabla-servicios {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .tabla-servicios thead {
+      background: #16150E;
+      color: white;
+    }
+    .tabla-servicios th {
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .tabla-servicios td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e8e8e8;
+      font-size: 13px;
+    }
+    .tabla-servicios tbody tr:hover {
+      background: #f5f5f5;
+    }
+    .tabla-servicios code {
+      background: #e8e8e8;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+    }
+    
     .costo-box {
       background: #16150E;
       color: #FFF97D;
@@ -396,25 +864,14 @@ function generarEmailHTML(data) {
       </div>
 
       <div class="section">
-        <div class="section-title">👤 PERFILES IDENTIFICADOS (${perfiles.length})</div>
-        <ul class="profile-list">
-          ${perfiles.map(p => `
-            <li class="profile-item">
-              <div class="profile-name">${p.name}</div>
-              <div>
-                <span class="profile-code">${p.code}</span>
-                ${p.description ? `<span style="color: #666; font-size: 14px;">${p.description}</span>` : ''}
-              </div>
-              <div class="profile-services">
-                <span class="services-badge">${p.services?.obligatorios || 0} Obligatorios</span>
-                <span class="services-badge">${p.services?.opcionales || 0} Opcionales</span>
-              </div>
-            </li>
-          `).join('')}
-        </ul>
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 15px;">
-          <strong>Total de servicios:</strong> ${totalObligatorios} obligatorios + ${totalOpcionales} opcionales = <strong>${serviciosTotales}</strong>
-        </div>
+        <div class="section-title">📋 CATÁLOGO COMPLETO DE SERVICIOS POR PERFIL</div>
+        <p style="color: #666; margin-bottom: 20px;">
+          <strong>Total de perfiles identificados:</strong> ${detalleServicios.length} | 
+          <strong>Servicios obligatorios:</strong> ${totalObligatorios} | 
+          <strong>Servicios opcionales:</strong> ${totalOpcionales} | 
+          <strong>Total:</strong> ${totalObligatorios + totalOpcionales}
+        </p>
+        ${generarTablaServicios(detalleServicios)}
       </div>
 
       <div class="costo-box">
@@ -431,7 +888,7 @@ function generarEmailHTML(data) {
         <ol style="padding-left: 20px; line-height: 2;">
           <li><strong>Contactar al prospecto</strong> en las próximas 24 horas</li>
           <li><strong>Validar información</strong> de volumetría (cuentas y operaciones)</li>
-          <li><strong>Revisar servicios</strong> específicos según perfiles identificados</li>
+          <li><strong>Revisar catálogo de servicios adjunto</strong> y confirmar necesidades específicas</li>
           <li><strong>Preparar cotización formal</strong> usando la matriz de costeo</li>
           <li><strong>Agendar reunión</strong> de presentación de propuesta</li>
         </ol>
@@ -443,9 +900,9 @@ function generarEmailHTML(data) {
       <a href="mailto:${contacto.email}" class="btn-action">📧 Contactar Cliente</a>
       <a href="tel:${contacto.telefono}" class="btn-action">📞 Llamar Ahora</a>
       <p class="footer-text">MC&DJ Consultores Profesionales</p>
-      <p class="footer-text">Sistema de Gestión de Prospectos v2.0</p>
+      <p class="footer-text">Sistema de Gestión de Prospectos v3.0</p>
       <p class="footer-text" style="font-size: 12px; opacity: 0.6;">
-        Este email fue generado automáticamente desde app.mcydj.mx
+        Email generado automáticamente | Ver JSON adjunto para datos completos
       </p>
     </div>
   </div>
@@ -458,7 +915,7 @@ function generarEmailHTML(data) {
  * Handler principal de la API
  */
 export default async function handler(req, res) {
-  // CORS headers para permitir peticiones desde el frontend
+  // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -467,13 +924,11 @@ export default async function handler(req, res) {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
 
-  // Handle preflight
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  // Solo permitir POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
@@ -481,13 +936,21 @@ export default async function handler(req, res) {
   try {
     const data = req.body;
     
-    // Validar datos mínimos
     if (!data.respuestas || !data.perfiles) {
       return res.status(400).json({ error: 'Datos incompletos' });
     }
 
+    // Obtener detalle completo de servicios
+    const detalleServicios = obtenerDetalleServicios(data.perfiles);
+    
+    // Agregar detalle al data object
+    const dataCompleto = {
+      ...data,
+      detalleServicios
+    };
+
     // Generar contenido del email
-    const htmlContent = generarEmailHTML(data);
+    const htmlContent = generarEmailHTML(dataCompleto);
     const contacto = data.respuestas.datosContacto || {};
 
     // Enviar email con Resend
@@ -496,16 +959,14 @@ export default async function handler(req, res) {
       to: [process.env.EMAIL_TO || 'consultorias_integrales@hotmail.com'],
       subject: `🎯 Nuevo Prospecto: ${contacto.nombre || 'Sin nombre'} - ${data.complejidad?.nivelReal || 'N/A'}`,
       html: htmlContent,
-      // Adjuntar JSON
       attachments: [
         {
           filename: `prospecto-${contacto.nombre?.replace(/\s+/g, '-')}-${Date.now()}.json`,
-          content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
+          content: Buffer.from(JSON.stringify(dataCompleto, null, 2)).toString('base64'),
         }
       ]
     });
 
-    // Log para analytics
     console.log('Email enviado exitosamente:', {
       id: emailResult.id,
       cliente: contacto.nombre,
@@ -513,10 +974,10 @@ export default async function handler(req, res) {
       nivel: data.complejidad?.nivelReal,
       horas: data.complejidad?.horasEstimadas,
       perfiles: data.perfiles.length,
+      serviciosTotales: detalleServicios.reduce((sum, p) => sum + p.totales.total, 0),
       fecha: data.fecha
     });
 
-    // Respuesta exitosa
     return res.status(200).json({
       success: true,
       message: 'Cuestionario procesado y email enviado',
@@ -525,7 +986,7 @@ export default async function handler(req, res) {
         cliente: contacto.nombre,
         nivel: data.complejidad?.nivelReal,
         horasEstimadas: data.complejidad?.horasEstimadas,
-        serviciosTotales: data.serviciosTotales
+        serviciosTotales: detalleServicios.reduce((sum, p) => sum + p.totales.total, 0)
       }
     });
 
