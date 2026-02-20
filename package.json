@@ -1,0 +1,16 @@
+{
+  "name": "mcydj-cuestionario-v2",
+  "version": "2.0.0",
+  "description": "Sistema de cuestionario con análisis de complejidad operativa - MC&DJ",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "resend": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
