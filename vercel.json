@@ -1,9 +1,8 @@
 {
   "version": 2,
-  "name": "mcydj-cuestionario",
   "builds": [
     {
-      "src": "api/**/*.js",
+      "src": "package.json",
       "use": "@vercel/node"
     }
   ],
