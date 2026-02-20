@@ -956,7 +956,7 @@ export default async function handler(req, res) {
     // Enviar email con Resend
     const emailResult = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'MC&DJ Cuestionario <conecta@mcydj.mx>',
-      to: [process.env.EMAIL_TO || 'consultorias_integrales@hotmail.com'],
+      to: (process.env.EMAIL_TO || 'direcciongeneralcyeps@gmail.com,diego.puerto@live.com.mx').split(','),
       subject: `🎯 Nuevo Prospecto: ${contacto.nombre || 'Sin nombre'} - ${data.complejidad?.nivelReal || 'N/A'}`,
       html: htmlContent,
       attachments: [
